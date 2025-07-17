@@ -12,6 +12,8 @@ class Countdown(BaseModel):
     """A single countdown"""
     label: str
     deadline: datetime.datetime
+    # TODO catalog start time
+    #start_time: datetime.datetime
 
     def output(self):
         """Output countdown with time remaining"""
