@@ -21,7 +21,7 @@ def get_countdowns():
 def add_countdown(countdown_list, countdown_dict):
     """Add a new countdow to the list"""
     new_countdown = Stopwatch()
-    new_countdown.name = countdown_dict["label"]
+    new_countdown.my_name = countdown_dict["label"]
     new_countdown.end_time = datetime.datetime.fromisoformat(countdown_dict["deadline"])
     #countdown_list.query_one("#timers").mount(new_stopwatch)
     countdown_list.mount(new_countdown)
@@ -71,7 +71,7 @@ class TimeDisplay(Digits):
 class Stopwatch(Horizontal):
     """A stopwatch widget."""
 
-    name = reactive("")
+    my_name = reactive("")
     end_time = reactive(datetime.datetime.now())
 
 #    def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -92,11 +92,25 @@ class Stopwatch(Horizontal):
  #       yield Button("Start", id="start", variant="success")
  #       yield Button("Stop", id="stop", variant="error")
  #       yield Button("Reset", id="reset")
-        # TODO yield Label
-        yield Label(self.name)
+        yield Label(self.my_name)
         my_time = TimeDisplay()
         my_time.end_time = self.end_time
         yield my_time
+
+class Clock(Digits):
+    """A clock that just shows the current time"""
+
+    time = reactive(datetime.datetime.now)
+
+    def on_mount(self) -> None:
+        """Event handler called when widget is added to the app."""
+        self.set_interval(1, self.update_time)  #, pause=True)
+
+    def update_time(self) -> None:
+        """Method to update time to current."""
+        self.time = datetime.datetime.now()
+        self.update(f"{self.time.hour:02,.0f}:{self.time.minute:02.0f}")
+
 
 
 class StopwatchApp(App):
@@ -112,13 +126,12 @@ class StopwatchApp(App):
     def compose(self) -> ComposeResult:
         """Called to add widgets to the app."""
         yield Header()
-        yield Footer()
+        yield Footer(Clock())
         my_scroll = VerticalScroll(id="timers")
         # TODO do this all the time
         for countdown in get_countdowns():
             add_countdown(my_scroll, countdown)
         yield my_scroll
-        # TODO add a clock
 
 
 #    def action_add_stopwatch(self) -> None:
