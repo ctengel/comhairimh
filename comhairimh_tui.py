@@ -7,7 +7,7 @@ from time import monotonic
 import datetime
 
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, VerticalScroll
+from textual.containers import Horizontal, VerticalScroll, Vertical
 from textual.reactive import reactive
 from textual.widgets import Button, Digits, Footer, Header, Label
 import requests
@@ -39,7 +39,7 @@ class TimeDisplay(Digits):
 
     def on_mount(self) -> None:
         """Event handler called when widget is added to the app."""
-        self.update_timer = self.set_interval(1 / 60, self.update_time)  #, pause=True)
+        self.update_timer = self.set_interval(1, self.update_time)  #, pause=True)
 
     def update_time(self) -> None:
         """Method to update time to current."""
@@ -49,7 +49,7 @@ class TimeDisplay(Digits):
         """Called when the time attribute changes."""
         minutes, seconds = divmod(time, 60)
         hours, minutes = divmod(minutes, 60)
-        self.update(f"{hours:02,.0f}:{minutes:02.0f}:{seconds:05.2f}")
+        self.update(f"{hours:02,.0f}:{minutes:02.0f}:{seconds:02.0f}")
 
     def start(self) -> None:
         """Method to start (or resume) time updating."""
@@ -126,12 +126,12 @@ class StopwatchApp(App):
     def compose(self) -> ComposeResult:
         """Called to add widgets to the app."""
         yield Header()
-        yield Footer(Clock())
+        yield Footer()
         my_scroll = VerticalScroll(id="timers")
         # TODO do this all the time
         for countdown in get_countdowns():
             add_countdown(my_scroll, countdown)
-        yield my_scroll
+        yield Vertical(my_scroll, Clock())
 
 
 #    def action_add_stopwatch(self) -> None:
