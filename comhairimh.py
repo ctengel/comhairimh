@@ -18,9 +18,15 @@ class Countdown(BaseModel):
     def output(self):
         """Output countdown with time remaining"""
         now = datetime.datetime.now()
+        remaining = max(int((self.deadline - now).total_seconds() / 60), 0)
         return {'label': self.label,
                 'deadline': self.deadline,
-                'remaining': int((self.deadline - now).total_seconds() / 60)}
+                'remaining': remaining}
+
+    def is_ack(self):
+        """True if countdown has been acknowledged"""
+        return (datetime.datetime.now() - self.deadline).total_seconds() > AUTO_ACK
+
 
 app = FastAPI(title="Comhairimh API")
 
@@ -32,7 +38,7 @@ countdowns = []
 def get_list():
     """Get top active countdowns"""
     return {'time': datetime.datetime.now(),
-            'countdowns': [x.output() for x in countdowns]}
+            'countdowns': [x.output() for x in countdowns if not x.is_ack()]}
 
 @app.post("/countdowns/")
 def add_countdown(countdown: Countdown):
