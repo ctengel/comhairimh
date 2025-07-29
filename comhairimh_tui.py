@@ -9,7 +9,8 @@ import datetime
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll, Vertical
 from textual.reactive import reactive
-from textual.widgets import Button, Digits, Footer, Header, Label
+from textual.widgets import Button, Digits, Footer, Header, Label, Input
+from textual.screen import ModalScreen
 import requests
 
 API_URL = "http://127.0.0.1:8000"
@@ -19,15 +20,25 @@ def get_countdowns():
     """Get current countdowns from API"""
     return requests.get(API_URL + "/countdowns/").json()["countdowns"]
 
-def add_countdown(countdown_list, countdown_dict):
-    """Add a new countdow to the list"""
-    new_countdown = Stopwatch()
-    new_countdown.my_name = countdown_dict["label"]
-    new_countdown.end_time = datetime.datetime.fromisoformat(countdown_dict["deadline"])
-    #countdown_list.query_one("#timers").mount(new_stopwatch)
-    countdown_list.mount(new_countdown)
-    # TODO scroll when possible
-    #new_countdown.scroll_visible()
+def add_countdown(countdown_string, countdown_list):
+    """Add a new countdown to the list"""
+    (count_time, _, count_label) = countdown_string.partition(' ')
+    requests.post(API_URL + "/countdowns/",
+                  json={'label': count_label,
+                        'deadline': datetime.datetime.combine(datetime.date.today(),
+                                                              datetime.time.fromisoformat(count_time)).isoformat()})
+    countdown_list.reload()
+
+
+class CardEdit(ModalScreen[str]):
+    """Ask user for text of card"""
+
+    def compose(self) -> ComposeResult:
+        yield Input()
+
+    def on_input_submitted(self) -> None:
+        """Exit screen with input value"""
+        self.dismiss(self.query_one(Input).value)
 
 
 class TimeDisplay(Digits):
@@ -117,7 +128,6 @@ class CountdownClocks(VerticalScroll):
 
     def compose(self):
         """Add timers"""
-        # TODO do this all the time
         for countdown in get_countdowns():
             new_countdown = Stopwatch()
             new_countdown.my_name = countdown["label"]
@@ -138,10 +148,10 @@ class StopwatchApp(App):
 
     CSS_PATH = "stopwatch.tcss"
 
-#    BINDINGS = [
-#        ("a", "add_stopwatch", "Add"),
+    BINDINGS = [
+        ("a", "add_stopwatch", "Add"),
 #        ("r", "remove_stopwatch", "Remove"),
-#    ]
+    ]
 
     def compose(self) -> ComposeResult:
         """Called to add widgets to the app."""
@@ -153,11 +163,15 @@ class StopwatchApp(App):
         yield Vertical(my_scroll, Clock())
 
 
-#    def action_add_stopwatch(self) -> None:
-#        """An action to add a timer."""
-#        new_stopwatch = Stopwatch()
-#        self.query_one("#timers").mount(new_stopwatch)
-#        new_stopwatch.scroll_visible()
+    def action_add_stopwatch(self) -> None:
+        """An action to add a timer."""
+        tgt_list = self.query_one(CountdownClocks)
+
+        def add_card_callback(card_text: str | None) -> None:
+            """Called when card edit completes"""
+            add_countdown(card_text, tgt_list)
+
+        self.push_screen(CardEdit(), add_card_callback)
 
 #    def action_remove_stopwatch(self) -> None:
 #        """Called to remove a timer."""
