@@ -13,6 +13,7 @@ from textual.widgets import Button, Digits, Footer, Header, Label
 import requests
 
 API_URL = "http://127.0.0.1:8000"
+API_REFRESH = 60
 
 def get_countdowns():
     """Get current countdowns from API"""
@@ -111,6 +112,25 @@ class Clock(Digits):
         self.time = datetime.datetime.now()
         self.update(f"{self.time.hour:02,.0f}:{self.time.minute:02.0f}")
 
+class CountdownClocks(VerticalScroll):
+    """A group of countdown timers"""
+
+    def compose(self):
+        """Add timers"""
+        # TODO do this all the time
+        for countdown in get_countdowns():
+            new_countdown = Stopwatch()
+            new_countdown.my_name = countdown["label"]
+            new_countdown.end_time = datetime.datetime.fromisoformat(countdown["deadline"])
+            yield new_countdown
+
+    def reload(self):
+        """Reload the entire list from API"""
+        self.refresh(recompose=True)
+
+    def on_mount(self):
+        """Set refresh time"""
+        self.set_interval(API_REFRESH, self.reload)
 
 
 class StopwatchApp(App):
@@ -127,10 +147,9 @@ class StopwatchApp(App):
         """Called to add widgets to the app."""
         yield Header()
         yield Footer()
-        my_scroll = VerticalScroll(id="timers")
-        # TODO do this all the time
-        for countdown in get_countdowns():
-            add_countdown(my_scroll, countdown)
+        my_scroll = CountdownClocks(id="timers")
+        #for countdown in get_countdowns():
+        #    add_countdown(my_scroll, countdown)
         yield Vertical(my_scroll, Clock())
 
 
