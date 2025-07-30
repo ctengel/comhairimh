@@ -38,7 +38,8 @@ countdowns = []
 def get_list():
     """Get top active countdowns"""
     return {'time': datetime.datetime.now(),
-            'countdowns': [x.output() for x in countdowns if not x.is_ack()]}
+            'countdowns': sorted([x.output() for x in countdowns if not x.is_ack()],
+                                 key=lambda y: y['remaining'])}
 
 @app.post("/countdowns/")
 def add_countdown(countdown: Countdown):
