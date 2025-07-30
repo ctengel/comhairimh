@@ -61,6 +61,10 @@ class TimeDisplay(Digits):
         """Called when the time attribute changes."""
         minutes, seconds = divmod(time, 60)
         hours, minutes = divmod(minutes, 60)
+        if time < 0:
+            hours = 0
+            minutes = 0
+            seconds = 0
         self.update(f"{hours:02,.0f}:{minutes:02.0f}:{seconds:02.0f}")
 
     def start(self) -> None:
@@ -68,16 +72,16 @@ class TimeDisplay(Digits):
         self.start_time = monotonic()
         self.update_timer.resume()
 
-    def stop(self):
-        """Method to stop the time display updating."""
-        self.update_timer.pause()
-        self.total += monotonic() - self.start_time
-        self.time = self.total
+#    def stop(self):
+#        """Method to stop the time display updating."""
+#        self.update_timer.pause()
+#        self.total += monotonic() - self.start_time
+#        self.time = self.total
 
-    def reset(self):
-        """Method to reset the time display to zero."""
-        self.total = 0
-        self.time = 0
+#    def reset(self):
+#        """Method to reset the time display to zero."""
+#        self.total = 0
+#        self.time = 0
 
 
 class Stopwatch(Horizontal):
