@@ -18,7 +18,8 @@ API_REFRESH = 60
 
 def get_countdowns():
     """Get current countdowns from API"""
-    return requests.get(API_URL + "/countdowns/").json()["countdowns"]
+    return requests.get(API_URL + "/countdowns/",
+                        timeout=1).json()["countdowns"]
 
 def add_countdown(countdown_string, countdown_list):
     """Add a new countdown to the list"""
@@ -26,7 +27,14 @@ def add_countdown(countdown_string, countdown_list):
     requests.post(API_URL + "/countdowns/",
                   json={'label': count_label,
                         'deadline': datetime.datetime.combine(datetime.date.today(),
-                                                              datetime.time.fromisoformat(count_time)).isoformat()})
+                                                              datetime.time.fromisoformat(count_time)).isoformat()},
+                  timeout=1)
+    countdown_list.reload()
+
+def add_pomodoro(countdown_list):
+    requests.post(API_URL + "/pomodoros/",
+                  json={'pomodoro_type': 'next'},
+                  timeout=1)
     countdown_list.reload()
 
 
@@ -155,6 +163,7 @@ class StopwatchApp(App):
     BINDINGS = [
         ("a", "add_stopwatch", "Add"),
 #        ("r", "remove_stopwatch", "Remove"),
+        ("p", "start_pomodoro", "Pom")
     ]
 
     def compose(self) -> ComposeResult:
@@ -182,6 +191,11 @@ class StopwatchApp(App):
 #        timers = self.query("Stopwatch")
 #        if timers:
 #            timers.last().remove()
+
+    def action_start_pomodoro(self) -> None:
+        """Start the next pomodoro"""
+        tgt_list = self.query_one(CountdownClocks)
+        add_pomodoro(tgt_list)
 
 
 if __name__ == "__main__":
