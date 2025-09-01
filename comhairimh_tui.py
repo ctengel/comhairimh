@@ -32,6 +32,7 @@ def add_countdown(countdown_string, countdown_list):
     countdown_list.reload()
 
 def add_pomodoro(countdown_list):
+    """Start a pomodoro"""
     requests.post(API_URL + "/pomodoros/",
                   json={'pomodoro_type': 'next'},
                   timeout=1)
