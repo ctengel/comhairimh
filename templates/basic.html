@@ -1,0 +1,5 @@
+<!doctype html>
+<title>Comhairimh</title>
+{% for timer in timers %}
+<p>{{timer.remaining}} {{timer.label}}
+{% endfor %}
