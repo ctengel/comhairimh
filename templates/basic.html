@@ -1,5 +1,27 @@
 <!doctype html>
 <title>Comhairimh</title>
+<table>
 {% for timer in timers %}
-<p>{{timer.remaining}} {{timer.label}}
+<tr><td>{{timer.label}}</td><td>{{timer.remaining}}</td><td></td></tr>
 {% endfor %}
+<form action="{{url_for('home')}}"><tr>
+	<td></td>
+	<td>{{time}}</td>
+	<td><input type="submit" value="refresh" /></td>
+</tr></form>
+<form action="{{url_for('add_timer')}}" method="post"><tr>
+	<td><input name="label" /></td>
+	<td><input type="time" name="deadline" /></td>
+	<td><input type="submit" /></td>
+</tr></form>
+<form action="{{url_for('add_timer')}}" method="post"><tr>
+	<td><input type="hidden" name="pom" value="true" /></td>
+	<td></td>
+	<td><input type="submit" value="pom"/></td>
+</tr></form>
+</table>
+<script>
+setInterval(function() {
+    location.reload(); 
+}, 60000);
+</script>

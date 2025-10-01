@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Countdown TUI
 
 From https://textual.textualize.io/tutorial/
@@ -134,7 +135,7 @@ class Clock(Digits):
     def update_time(self) -> None:
         """Method to update time to current."""
         self.time = datetime.datetime.now()
-        self.update(f"{self.time.hour:02,.0f}:{self.time.minute:02.0f}")
+        self.update(f"{self.time.hour:02,.0f}:{self.time.minute:02.0f}")  # TODO strftime
 
 class CountdownClocks(VerticalScroll):
     """A group of countdown timers"""
