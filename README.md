@@ -7,12 +7,12 @@ Countdown RESTful API
 
 ## run API
 
-`fastapi dev --port 28776 comhairimh.py`
+`fastapi run --host 0.0.0.0 --port 28776 comhairimh.py`
 
 ## run HTML
 
-`flask --app comhairimh_html run --port 28788`
+`COMHAIRIMH_API=http://127.0.0.1:28776/ flask --app comhairimh_html run --port 28788 --host 0.0.0.0`
 
 ## TUI
 
-`./comhairimh_tui.py`
+`COMHAIRIMH_API=http://127.0.0.1:28776/ ./comhairimh_tui.py`

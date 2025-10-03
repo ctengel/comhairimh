@@ -6,6 +6,7 @@ From https://textual.textualize.io/tutorial/
 
 from time import monotonic
 import datetime
+import os
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll, Vertical
@@ -14,18 +15,18 @@ from textual.widgets import Button, Digits, Footer, Header, Label, Input
 from textual.screen import ModalScreen
 import requests
 
-API_URL = "http://127.0.0.1:28776"
+API_URL = os.getenv('COMHAIRIMH_API', "http://127.0.0.1:28776/")
 API_REFRESH = 60
 
 def get_countdowns():
     """Get current countdowns from API"""
-    return requests.get(API_URL + "/countdowns/",
+    return requests.get(API_URL + "countdowns/",
                         timeout=1).json()["countdowns"]
 
 def add_countdown(countdown_string, countdown_list):
     """Add a new countdown to the list"""
     (count_time, _, count_label) = countdown_string.partition(' ')
-    requests.post(API_URL + "/countdowns/",
+    requests.post(API_URL + "countdowns/",
                   json={'label': count_label,
                         'deadline': datetime.datetime.combine(datetime.date.today(),
                                                               datetime.time.fromisoformat(count_time)).isoformat()},
@@ -34,7 +35,7 @@ def add_countdown(countdown_string, countdown_list):
 
 def add_pomodoro(countdown_list):
     """Start a pomodoro"""
-    requests.post(API_URL + "/pomodoros/",
+    requests.post(API_URL + "pomodoros/",
                   json={'pomodoro_type': 'next'},
                   timeout=1)
     countdown_list.reload()
@@ -198,6 +199,10 @@ class StopwatchApp(App):
         """Start the next pomodoro"""
         tgt_list = self.query_one(CountdownClocks)
         add_pomodoro(tgt_list)
+
+    def on_mount(self) -> None:
+        """Set the title"""
+        self.title = "Comhairimh"
 
 
 if __name__ == "__main__":

@@ -1,5 +1,15 @@
-<!doctype html>
-<title>Comhairimh</title>
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<title>{% if timers %}{{timers[0].remaining}} - {{timers[0].label}} - {% endif %}Comhairimh</title>
+	<meta charset='utf-8'>
+	<script>
+	setInterval(function() {
+		location.reload();
+	}, 60000);
+	</script>
+</head>
+<body>
 <table>
 {% for timer in timers %}
 <tr><td>{{timer.label}}</td><td>{{timer.remaining}}</td><td></td></tr>
@@ -20,8 +30,5 @@
 	<td><input type="submit" value="pom"/></td>
 </tr></form>
 </table>
-<script>
-setInterval(function() {
-    location.reload(); 
-}, 60000);
-</script>
+</body>
+</html>

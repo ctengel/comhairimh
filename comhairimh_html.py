@@ -1,10 +1,11 @@
 """Extremely basic mostly static HTML front end"""
 
 import datetime
+import os
 from flask import Flask, render_template, request, redirect, url_for
 import requests
 
-COMHAIRIMH_API = 'http://127.0.0.1:28776/'  # TODO env
+COMHAIRIMH_API =  os.getenv('COMHAIRIMH_API', "http://127.0.0.1:28776/")  # TODO flask cfg
 
 app = Flask(__name__)
 
