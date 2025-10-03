@@ -14,7 +14,7 @@ from textual.widgets import Button, Digits, Footer, Header, Label, Input
 from textual.screen import ModalScreen
 import requests
 
-API_URL = "http://127.0.0.1:8000"
+API_URL = "http://127.0.0.1:28776"
 API_REFRESH = 60
 
 def get_countdowns():

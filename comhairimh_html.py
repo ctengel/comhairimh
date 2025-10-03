@@ -4,7 +4,7 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for
 import requests
 
-COMHAIRIMH_API = 'http://127.0.0.1:8000/'  # TODO env
+COMHAIRIMH_API = 'http://127.0.0.1:28776/'  # TODO env
 
 app = Flask(__name__)
 
