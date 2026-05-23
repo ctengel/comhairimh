@@ -1,4 +1,4 @@
 fastapi
 textual
 flask
-reqiests
+requests
