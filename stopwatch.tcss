@@ -29,6 +29,10 @@ Button {
     dock: right;
 }
 
+#ack {
+    dock: right;
+}
+
 .started {
     background: $success;
     color: $text;

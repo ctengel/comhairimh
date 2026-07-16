@@ -40,6 +40,12 @@ def add_pomodoro(countdown_list):
                   timeout=1)
     countdown_list.reload()
 
+def ack_countdown(countdown_id, countdown_list):
+    """Acknowledge a countdown"""
+    requests.post(API_URL + f"countdowns/{countdown_id}/ack",
+                  timeout=1)
+    countdown_list.reload()
+
 
 class CardEdit(ModalScreen[str]):
     """Ask user for text of card"""
@@ -99,7 +105,13 @@ class Stopwatch(Horizontal):
     """A stopwatch widget."""
 
     my_name = reactive("")
+    my_id = reactive(None)
     end_time = reactive(datetime.datetime.now())
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        if event.button.id == "ack":
+            ack_countdown(self.my_id, self.app.query_one(CountdownClocks))
 
 #    def on_button_pressed(self, event: Button.Pressed) -> None:
 #        """Event handler called when a button is pressed."""
@@ -123,6 +135,7 @@ class Stopwatch(Horizontal):
         my_time = TimeDisplay()
         my_time.end_time = self.end_time
         yield my_time
+        yield Button("Ack", id="ack")
 
 class Clock(Digits):
     """A clock that just shows the current time"""
@@ -146,6 +159,7 @@ class CountdownClocks(VerticalScroll):
         for countdown in get_countdowns():
             new_countdown = Stopwatch()
             new_countdown.my_name = countdown["label"]
+            new_countdown.my_id = countdown["id"]
             new_countdown.end_time = datetime.datetime.fromisoformat(countdown["deadline"])
             yield new_countdown
 
