@@ -36,3 +36,10 @@ def add_timer():
                                                                     datetime.time.fromisoformat(request.form.get('deadline'))).isoformat()})
     res.raise_for_status()
     return redirect(url_for('home'))
+
+@app.post('/ack')
+def ack_timer():
+    """Acknowledge the soonest timer"""
+    res = requests.post(COMHAIRIMH_API + 'countdowns/ack', timeout=5)
+    res.raise_for_status()
+    return redirect(url_for('home'))

@@ -40,6 +40,12 @@ def add_pomodoro(countdown_list):
                   timeout=1)
     countdown_list.reload()
 
+def ack_countdown(countdown_list):
+    """Acknowledge the soonest countdown"""
+    requests.post(API_URL + "countdowns/ack",
+                  timeout=1)
+    countdown_list.reload()
+
 
 class CardEdit(ModalScreen[str]):
     """Ask user for text of card"""
@@ -166,7 +172,8 @@ class StopwatchApp(App):
     BINDINGS = [
         ("a", "add_stopwatch", "Add"),
 #        ("r", "remove_stopwatch", "Remove"),
-        ("p", "start_pomodoro", "Pom")
+        ("p", "start_pomodoro", "Pom"),
+        ("k", "ack_countdown", "Ack")
     ]
 
     def compose(self) -> ComposeResult:
@@ -199,6 +206,11 @@ class StopwatchApp(App):
         """Start the next pomodoro"""
         tgt_list = self.query_one(CountdownClocks)
         add_pomodoro(tgt_list)
+
+    def action_ack_countdown(self) -> None:
+        """Acknowledge the soonest countdown"""
+        tgt_list = self.query_one(CountdownClocks)
+        ack_countdown(tgt_list)
 
     def on_mount(self) -> None:
         """Set the title"""
