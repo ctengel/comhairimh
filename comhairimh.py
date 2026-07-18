@@ -3,7 +3,7 @@
 import datetime
 import enum
 #from typing import Optional
-from fastapi import FastAPI  #, Depends, HTTPException
+from fastapi import FastAPI, HTTPException  #, Depends
 from pydantic import BaseModel
 
 AUTO_ACK = 300
@@ -13,6 +13,7 @@ class Countdown(BaseModel):
     """A single countdown"""
     label: str
     deadline: datetime.datetime
+    acked: bool = False
     # TODO catalog start time
     #start_time: datetime.datetime
 
@@ -26,7 +27,7 @@ class Countdown(BaseModel):
 
     def is_ack(self):
         """True if countdown has been acknowledged"""
-        return (datetime.datetime.now() - self.deadline).total_seconds() > AUTO_ACK
+        return self.acked or (datetime.datetime.now() - self.deadline).total_seconds() > AUTO_ACK
 
 
 class PomodoroType(str, enum.Enum):
@@ -46,6 +47,7 @@ app = FastAPI(title="Comhairimh API")
 #                        deadline=datetime.datetime.now() + datetime.timedelta(minutes=25))]
 countdowns = []
 current_pom = None
+current_pom_countdown = None
 
 @app.get("/countdowns/")
 def get_list():
@@ -60,10 +62,20 @@ def add_countdown(countdown: Countdown):
     countdowns.append(countdown)
     return countdown.output()
 
+@app.post("/countdowns/ack")
+def ack_countdown():
+    """Acknowledge the soonest or most overdue countdown"""
+    active = [x for x in countdowns if not x.is_ack()]
+    if not active:
+        raise HTTPException(status_code=404, detail="No active countdowns")
+    soonest = min(active, key=lambda y: y.deadline)
+    soonest.acked = True
+    return soonest.output()
+
 @app.post("/pomodoros/")
 def start_pomodoro(pomodoro: Pomodoro):
     """Start a pomodoro"""
-    global current_pom
+    global current_pom, current_pom_countdown
     if pomodoro.pomodoro_type == PomodoroType.next_:
         pomodoro.pomodoro_type = PomodoroType.work
         if current_pom and current_pom.pomodoro_type == PomodoroType.work:
@@ -73,7 +85,10 @@ def start_pomodoro(pomodoro: Pomodoro):
         length = 5
     deadline = datetime.datetime.now() + datetime.timedelta(minutes=length)
     current_pom = pomodoro
+    if current_pom_countdown:
+        current_pom_countdown.acked = True
     countdown = Countdown(label=f"{pomodoro.pomodoro_type.value} pomodoro",
                           deadline=deadline)
     countdowns.append(countdown)
+    current_pom_countdown = countdown
     return countdown.output()
