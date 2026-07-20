@@ -113,19 +113,6 @@ class Stopwatch(Horizontal):
         if event.button.id == "ack":
             ack_countdown(self.my_id, self.app.query_one(CountdownClocks))
 
-#    def on_button_pressed(self, event: Button.Pressed) -> None:
-#        """Event handler called when a button is pressed."""
-#        button_id = event.button.id
-#        time_display = self.query_one(TimeDisplay)
-#        if button_id == "start":
-#            time_display.start()
-#            self.add_class("started")
-#        elif button_id == "stop":
-#            time_display.stop()
-#            self.remove_class("started")
-#        elif button_id == "reset":
-#            time_display.reset()
-
     def compose(self) -> ComposeResult:
         """Create child widgets of a stopwatch."""
  #       yield Button("Start", id="start", variant="success")
@@ -180,7 +167,8 @@ class StopwatchApp(App):
     BINDINGS = [
         ("a", "add_stopwatch", "Add"),
 #        ("r", "remove_stopwatch", "Remove"),
-        ("p", "start_pomodoro", "Pom")
+        ("p", "start_pomodoro", "Pom"),
+        ("k", "ack_countdown", "Ack")
     ]
 
     def compose(self) -> ComposeResult:
@@ -213,6 +201,12 @@ class StopwatchApp(App):
         """Start the next pomodoro"""
         tgt_list = self.query_one(CountdownClocks)
         add_pomodoro(tgt_list)
+
+    def action_ack_countdown(self) -> None:
+        """Acknowledge the countdown at the top of the list"""
+        timers = self.query(Stopwatch)
+        if timers:
+            ack_countdown(timers.first().my_id, self.query_one(CountdownClocks))
 
     def on_mount(self) -> None:
         """Set the title"""
