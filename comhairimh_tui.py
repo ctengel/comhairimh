@@ -40,6 +40,12 @@ def add_pomodoro(countdown_list):
                   timeout=1)
     countdown_list.reload()
 
+def ack_countdown(countdown_id, countdown_list):
+    """Acknowledge a countdown"""
+    requests.post(API_URL + f"countdowns/{countdown_id}/ack",
+                  timeout=1)
+    countdown_list.reload()
+
 
 class CardEdit(ModalScreen[str]):
     """Ask user for text of card"""
@@ -99,20 +105,13 @@ class Stopwatch(Horizontal):
     """A stopwatch widget."""
 
     my_name = reactive("")
+    my_id = reactive(None)
     end_time = reactive(datetime.datetime.now())
 
-#    def on_button_pressed(self, event: Button.Pressed) -> None:
-#        """Event handler called when a button is pressed."""
-#        button_id = event.button.id
-#        time_display = self.query_one(TimeDisplay)
-#        if button_id == "start":
-#            time_display.start()
-#            self.add_class("started")
-#        elif button_id == "stop":
-#            time_display.stop()
-#            self.remove_class("started")
-#        elif button_id == "reset":
-#            time_display.reset()
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        if event.button.id == "ack":
+            ack_countdown(self.my_id, self.app.query_one(CountdownClocks))
 
     def compose(self) -> ComposeResult:
         """Create child widgets of a stopwatch."""
@@ -123,6 +122,7 @@ class Stopwatch(Horizontal):
         my_time = TimeDisplay()
         my_time.end_time = self.end_time
         yield my_time
+        yield Button("Ack", id="ack")
 
 class Clock(Digits):
     """A clock that just shows the current time"""
@@ -146,6 +146,7 @@ class CountdownClocks(VerticalScroll):
         for countdown in get_countdowns():
             new_countdown = Stopwatch()
             new_countdown.my_name = countdown["label"]
+            new_countdown.my_id = countdown["id"]
             new_countdown.end_time = datetime.datetime.fromisoformat(countdown["deadline"])
             yield new_countdown
 
@@ -166,7 +167,8 @@ class StopwatchApp(App):
     BINDINGS = [
         ("a", "add_stopwatch", "Add"),
 #        ("r", "remove_stopwatch", "Remove"),
-        ("p", "start_pomodoro", "Pom")
+        ("p", "start_pomodoro", "Pom"),
+        ("k", "ack_countdown", "Ack")
     ]
 
     def compose(self) -> ComposeResult:
@@ -199,6 +201,12 @@ class StopwatchApp(App):
         """Start the next pomodoro"""
         tgt_list = self.query_one(CountdownClocks)
         add_pomodoro(tgt_list)
+
+    def action_ack_countdown(self) -> None:
+        """Acknowledge the countdown at the top of the list"""
+        timers = self.query(Stopwatch)
+        if timers:
+            ack_countdown(timers.first().my_id, self.query_one(CountdownClocks))
 
     def on_mount(self) -> None:
         """Set the title"""

@@ -12,7 +12,7 @@
 <body>
 <table>
 {% for timer in timers %}
-<tr><td>{{timer.label}}</td><td>{{timer.remaining}}</td><td></td></tr>
+<tr><td>{{timer.label}}</td><td>{{timer.remaining}}</td><td><form action="{{url_for('ack_timer')}}" method="post"><input type="hidden" name="id" value="{{timer.id}}" /><input type="submit" value="ack" /></form></td></tr>
 {% endfor %}
 <form action="{{url_for('home')}}"><tr>
 	<td></td>
